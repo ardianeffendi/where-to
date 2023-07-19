@@ -1,18 +1,43 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
 
 generator client {
     provider = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
 }
 
-datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+model Traveler {
+    id    Int     @id @unique @default(autoincrement())
+    name  String  @db.VarChar(50)
+    Visit Visit[]
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Host {
+    id        Int       @id @unique @default(autoincrement())
+    name      String    @db.VarChar(50)
+    available Boolean   @default(false)
+    Address   Address[]
+}
+
+model Visit {
+    id         Int      @id @unique @default(autoincrement())
+    travelerId Int
+    addressId  Int
+    traveler   Traveler @relation(fields: [travelerId], references: [id])
+    address    Address  @relation(fields: [addressId], references: [id])
+    date       DateTime @db.Date
+}
+
+model Address {
+    id      Int     @id @unique @default(autoincrement())
+    address String  @db.VarChar(150)
+    suburb  String
+    state   String
+    host    Host    @relation(fields: [hostId], references: [id])
+    hostId  Int
+    Visit   Visit[]
 }
